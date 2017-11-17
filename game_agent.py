@@ -172,7 +172,7 @@ class MinimaxPlayer(IsolationPlayer):
 
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
-        the lectures.
+        the lectures. HELLO
 
         This should be a modified version of MINIMAX-DECISION in the AIMA text.
         https://github.com/aimacode/aima-pseudocode/blob/master/md/Minimax-Decision.md
