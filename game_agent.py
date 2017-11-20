@@ -172,7 +172,7 @@ class MinimaxPlayer(IsolationPlayer):
 
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
-        the lectures. HELLO
+        the lectures.
 
         This should be a modified version of MINIMAX-DECISION in the AIMA text.
         https://github.com/aimacode/aima-pseudocode/blob/master/md/Minimax-Decision.md
@@ -211,8 +211,35 @@ class MinimaxPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
+        return self.forecasting(game, depth)[0]
 
-        # TODO: finish this function!
+    def active_player(self, game):
+        return game.active_player == self
+
+    def forecasting(self, game, depth):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if depth == 0:
+            return (game.get_player_location(self), self.score(game, self))
+
+        best_move = (-1,-1)
+        if self.active_player(game):
+            m = max
+            best_score = float("-inf")
+        else:
+            m = min
+            best_score = float("inf")
+
+        for move in game.get_legal_moves():
+            forecast_game = game.forecast_move(move)
+            forecast_move, forecast_score = self.forecasting(forecast_game, depth - 1)
+            if m(best_score, forecast_score) == forecast_score:
+                best_score = forecast_score
+                best_move = move
+
+        return (best_move, best_score)
+
         raise NotImplementedError
 
 
