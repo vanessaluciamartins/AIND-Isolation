@@ -280,9 +280,19 @@ class AlphaBetaPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
+        #initial state of best move
+        best_move = (-1,-1)
 
-        #return (game.get_legal_moves(0))
-        raise NotImplementedError
+    #Continuously update best move until a Search Timeout error is raised
+        for i in range (0, 10000) :
+            try:
+                best_move = self.alphabeta(game, i)
+
+            # if exception raised, return best_move
+            except SearchTimeout:
+                break
+
+        return (best_move)
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -334,6 +344,7 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         best_move = (-1,-1)
 
+    #Set initial values and set maximizing player to looking for MAX score, minimizing player to looking for MIN score
         if MinimaxPlayer.active_player(self, game):
             m = max
             value = float("-inf")
@@ -345,31 +356,28 @@ class AlphaBetaPlayer(IsolationPlayer):
             if depth == 0:
                 return ((-1,-1), self.score(game, self))
 
-            # if self.active_player(game):
-            #     m = max
-            #     value = float("-inf")
-            # else:
-            #     m = min
-            #     value = float("inf")
-
             for move in game.get_legal_moves():
                 forecast_game = game.forecast_move(move)
                 forecast_move, forecast_score = forecasting(forecast_game, depth - 1)
-
+                # If maximizing player, look for max score, get related move, return best move and score if value is greater than theta
                 if active_player(game):
                     if m(value, forecast_score) == forecast_score:
                         value = forecast_score
                         best_move = move
                         if value >= beta:
                             return (best_move, value)
-                    theta = m(theta, value)
 
+                    #update theta to be the max of current theta and current value
+                    theta = m(theta, value)
+                # Repeat for minimizing playet
                 else:
                     if m(value, forecast_score) == forecast_score:
                         value = forecast_score
                         best_move = move
                         if value <= alpha:
                             return (best_move, value)
+
+                    #update beta to be the max of current beta and current value
                     beta = m(beta, value)
         return (best_move)
 
