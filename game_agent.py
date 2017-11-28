@@ -283,6 +283,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         #initial state of best move
         best_move = (-1,-1)
 
+
     #Continuously update best move until a Search Timeout error is raised
         for i in range (0, 10000):
             try:
@@ -294,7 +295,7 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         return (best_move)
 
-    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player = True):
         """Implement depth-limited minimax search with alpha-beta pruning as
         described in the lectures.
 
@@ -342,47 +343,41 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
+        legal_moves = game.get_legal_moves()
+
+        if legal_moves == []:
+            return((-1, -1), game.utility(self))
+
+        if depth == 0:
+            return ((-1,-1), self.score(game, self))
+
         best_move = (-1,-1)
+        best_score = float('-inf') if maximizing_player else float('inf')
 
-    #Set initial values and set maximizing player to looking for MAX score, minimizing player to looking for MIN score
-        if MinimaxPlayer.active_player(self, game):
-            m = max
-            value = float("-inf")
-        else:
-            m = min
-            value = float("inf")
-
-        def forecasting(self, game, depth,  alpha=float("-inf"), beta=float("inf")):
-            if depth == 0:
-                return ((-1,-1), self.score(game, self))
-
-            for move in game.get_legal_moves():
+        if maximizing_player == True:
+            for move in legal_moves:
                 forecast_game = game.forecast_move(move)
-                forecast_move, forecast_score = forecasting(forecast_game, depth - 1, alpha, beta)
-                # If maximizing player, look for max score, get related move, return best move and score if value is greater than alpha
-                if self.active_player( game):
-                    if m(value, forecast_score) == forecast_score:
-                        value = forecast_score
-                        best_move = move
-                        if value >= beta:
-                            return (best_move)
-                        #update alpha to be the max of current alpha and current value
-                        alpha = m(alpha, value)
+                forecast_move, forecast_score = self.alphabeta(forecast_game, depth - 1, alpha, beta, False)
+                if forecast_score > best_score:
+                    best_score = forecast_score
+                    best_move = move
+                if best_score >= beta:
+                    return (best_move)
 
+                alpha = max(best_score, alpha)
 
+        else:
+            for move in legal_moves:
+                forecast_game = game.forecast_move(move)
+                forecast_move, forecast_score = self.alphabeta(forecast_game, depth - 1, alpha, beta, False)
+                if forecast_score < best_score:
+                    best_score = forecast_score
+                    best_move = move
+                if best_score <= alpha:
+                    return (best_move)
 
-                # Repeat for minimizing player
-                else:
-                    if m(value, forecast_score) == forecast_score:
-                        value = forecast_score
-                        best_move = move
-                        if value <= alpha:
-                            return (best_move)
-                        #update beta to be the max of current beta and current value
-                        beta = m(beta, value)
+                beta = min(best_score, beta)
 
-
-
-        return (best_move)
+        return(best_move)
 
         raise NotImplementedError
